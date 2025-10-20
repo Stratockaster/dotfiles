@@ -188,14 +188,14 @@
 ;;   (setq lsp-disabled-clients '(ruby-ls rubocop-ls)
 ;;         lsp-solargraph-use-bundler nil
 ;;         lsp-completion-provider :capf))
-;;
-;;
+
 ;; (add-to-list 'exec-path "/Users/pavel/.rvm/gems/ruby-3.2.2/bin")
 ;; (setq lsp-solargraph-server-command '("/Users/pavel/.rvm/gems/ruby-3.2.2/bin/solargraph" "stdio"))
 (setq lsp-log-io nil)
 (setq lsp-use-plists t)
 
 (after! lsp-mode
+  (setq lsp-disabled-clients '(rubocop-ls))
   (setq lsp-pyright-multi-root nil   ;; Отключает поддержку нескольких корней (если проблемы)
         lsp-pyright-auto-import-completions t
         lsp-pyright-diagnostic-mode "workspace"
