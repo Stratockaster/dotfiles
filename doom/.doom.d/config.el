@@ -24,7 +24,6 @@
 (setq doom-variable-pitch-font (font-spec :family "PT Sans" :size 16))
 (setq doom-serif-font (font-spec :family "JetBrains Mono" :size 14))
 
-(setq org-hide-emphasis-markers t)
 (add-hook 'org-mode-hook
   (lambda ()
     ;; (variable-pitch-mode 1)
@@ -42,8 +41,8 @@
     ;; (set-fontset-font t 'cyrillic (font-spec :family "Open Sans"))
     ;; (set-fontset-font t 'cyrillic (font-spec :family "Manrope"))
     ;; (set-fontset-font t 'cyrillic (font-spec :family "IBMPlex Sans"))
-    ;; (set-fontset-font t 'cyrillic (font-spec :family "PT Sans" :size 16))
-    ;; (set-fontset-font t 'latin (font-spec :family "PT Sans" :size 16))
+    (set-fontset-font t 'cyrillic (font-spec :family "PT Sans" :size 16))
+    (set-fontset-font t 'latin (font-spec :family "PT Sans" :size 16))
     ;; (set-fontset-font t 'cyrillic (font-spec :family "JetBrains Mono"))
     ;; (set-fontset-font t 'cyrillic (font-spec :family "FiraGo"))
 
@@ -68,6 +67,13 @@
 
     (setq-local company-idle-delay 0.5)
 ))
+
+(after! org
+  (setq org-hide-emphasis-markers t)
+  (setq org-capture-templates
+    '(("d" "Diary" entry (file "~/org/diary.org") "* %t" :empty-lines 1))))
+
+(add-hook 'pdf-view-mode-hook (lambda () (display-line-numbers-mode -1)))
 
 (defun unfill-paragraph ()
   "Превращает текущий параграф в одну длинную строку."
@@ -172,6 +178,7 @@
               ("TAB" . 'copilot-accept-completion)
               ("C-TAB" . 'copilot-accept-completion-by-word)
               ("C-<tab>" . 'copilot-accept-completion-by-word)))
+(add-hook 'emacs-lisp-mode-hook (lambda () (setq-local copilot-indent-width 2)))
 
 (use-package git-gutter
   :hook (prog-mode . git-gutter-mode)
@@ -209,8 +216,11 @@
   (setq flycheck-idle-change-delay 3)
   (setq flycheck-check-syntax-automatically '(save mode-enabled)))
 
-(setq flycheck-command-wrapper-function
-  (lambda (command) (append '("bundle" "exec") command)))
+(setq-default flycheck-command-wrapper-function
+  (lambda (command)
+    (if (or (eq major-mode 'ruby-mode)
+            (eq major-mode 'ruby-ts-mode))
+        (append '("bundle" "exec") command) command)))
 
 (setq treesit-language-source-alist
    '((bash "https://github.com/tree-sitter/tree-sitter-bash")
@@ -225,7 +235,8 @@
      (ruby "https://github.com/tree-sitter/tree-sitter-ruby")
      (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
 
-(add-to-list 'treesit-extra-load-path "/Users/pavel/.emacs.d/.local/straight/build-29.1/tree-sitter-langs/bin/")
+(add-to-list 'treesit-extra-load-path (concat "~/.emacs.d/.local/straight/build-" emacs-version "/tree-sitter-langs/bin/"))
+
 (setq treesit-load-name-override-list '((ruby "ruby" "tree_sitter_ruby")))
 (setq major-mode-remap-alist
   '((ruby-mode . ruby-ts-mode)
@@ -261,6 +272,9 @@
 (bind-key "M-p" 'scroll-down-line)
 (bind-key "M-o" 'other-window)
 
+(bind-key "s-x" 'execute-extended-command)
+(bind-key "s-z" 'undo)
+
 ;; Needed for `:after char-fold' to work
 (use-package char-fold
   :custom
@@ -285,4 +299,17 @@
   (reverse-im-mode t)) ; turn the mode on
 
 (setq org-time-stamp-custom-formats '("%d.%m.%Y"))
-(setq org-display-custom-times t)  ;; Включает отображение в кастомном формате
+(setq org-display-custom-times t)  ;; Включает отображение в кастомном формате 
+
+;; For occur. Show 3 lines before and after matches
+(setq list-matching-lines-default-context-lines 3)
+
+;; Notmuch
+(after! notmuch
+  (setq notmuch-hello-auto-refresh t)
+  (set-popup-rule! "^\\*notmuch-hello\\*" :ignore t))
+
+(setq notmuch-show-logo nil)
+(setq +notmuch-sync-backend 'mbsync)
+(setq +notmuch-mail-folder "~/.mail/gmail")
+(setq notmuch-mail-folder "~/.mail/gmail")
