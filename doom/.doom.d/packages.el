@@ -62,3 +62,5 @@
 (package! blacken)
 
 (package! git-gutter)
+
+(package! copilot-chat)
