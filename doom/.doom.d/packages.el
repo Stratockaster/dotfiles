@@ -53,8 +53,7 @@
 (package! reverse-im
   :recipe (:host github :repo "a13/reverse-im.el"))
 
-(package! gptel)
-;; :recipe (:host github :repo "karthink/gptel")
+(package! gptel :recipe (:nonrecursive t))
 
 (unpin! org-roam)
 (package! org-roam-ui)

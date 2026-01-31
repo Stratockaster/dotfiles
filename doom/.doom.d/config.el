@@ -188,21 +188,27 @@
   (add-to-list 'copilot-indentation-alist '(python-mode 4))
   (add-to-list 'copilot-indentation-alist '(emacs-lisp-mode 2)))
 
-(use-package git-gutter
-  :hook (prog-mode . git-gutter-mode)
-  :config
-  (setq git-gutter:update-interval 0.02))
-
 (use-package! gptel
  :config
- (setq! gptel-api-key (getenv "OPENAI_API_KEY")))
+ (setq! gptel-api-key (getenv "OPENAI_API_KEY"))
+ (gptel-make-deepseek "DeepSeek" :stream t :key (getenv "DEEPSEEK_API_KEY"))
+ (gptel-make-gemini "Gemini" :stream t :key (getenv "GEMINI_API_KEY")))
 
 (setq lsp-log-io nil)
 (setq lsp-use-plists t)
 
+(set-fringe-style '(14 . 0))
+(after! diff-hl
+  (set-face-foreground 'diff-hl-insert "#0e960e")
+  (set-face-foreground 'diff-hl-change "#ffc400")
+  (set-face-foreground 'diff-hl-delete "#c7400e")
+  (diff-hl-flydiff-mode 1)
+  (add-hook 'after-save-hook #'diff-hl-update)
+  (add-hook 'magit-post-refresh-hook #'diff-hl-magit-post-refresh))
+
 (after! lsp-mode
   (setq lsp-disabled-clients '(rubocop-ls))
-  (setq lsp-pyright-multi-root nil   ;; Отключает поддержку нескольких корней (если проблемы)
+  (setq lsp-pyright-multi-root nil
         lsp-pyright-auto-import-completions t
         lsp-pyright-diagnostic-mode "workspace"
         lsp-pyright-typechecking-mode "basic")) ;; Можно "strict" для более строгой проверки
