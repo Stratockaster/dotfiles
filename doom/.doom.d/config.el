@@ -170,15 +170,23 @@
           org-roam-ui-update-on-save t
           org-roam-ui-open-on-start t))
 
-
 (use-package! copilot
   :hook (prog-mode . copilot-mode)
-  :bind (:map copilot-completion-map
-              ("<tab>" . 'copilot-accept-completion)
-              ("TAB" . 'copilot-accept-completion)
-              ("C-TAB" . 'copilot-accept-completion-by-word)
-              ("C-<tab>" . 'copilot-accept-completion-by-word)))
-(add-hook 'emacs-lisp-mode-hook (lambda () (setq-local copilot-indent-width 2)))
+  :bind (
+         ("C-c C-o" . copilot-complete)
+         :map copilot-completion-map
+         ("<tab>" . 'copilot-accept-completion)
+         ("TAB" . 'copilot-accept-completion)
+         ("C-TAB" . 'copilot-accept-completion-by-word)
+         ("C-<tab>" . 'copilot-accept-completion-by-word)
+         ("C-c C-o" . 'copilot-complete))
+  :config
+  (setq copilot-idle-delay nil)
+  (add-hook 'post-command-hook #'copilot-clear-overlay)
+  (add-to-list 'copilot-indentation-alist '(prog-mode 2))
+  (add-to-list 'copilot-indentation-alist '(ruby-mode 2))
+  (add-to-list 'copilot-indentation-alist '(python-mode 4))
+  (add-to-list 'copilot-indentation-alist '(emacs-lisp-mode 2)))
 
 (use-package git-gutter
   :hook (prog-mode . git-gutter-mode)
@@ -189,15 +197,6 @@
  :config
  (setq! gptel-api-key (getenv "OPENAI_API_KEY")))
 
-;; (use-package! lsp-mode
-;;   :hook (ruby-mode . lsp)
-;;   :config
-;;   (setq lsp-disabled-clients '(ruby-ls rubocop-ls)
-;;         lsp-solargraph-use-bundler nil
-;;         lsp-completion-provider :capf))
-
-;; (add-to-list 'exec-path "/Users/pavel/.rvm/gems/ruby-3.2.2/bin")
-;; (setq lsp-solargraph-server-command '("/Users/pavel/.rvm/gems/ruby-3.2.2/bin/solargraph" "stdio"))
 (setq lsp-log-io nil)
 (setq lsp-use-plists t)
 
@@ -209,8 +208,10 @@
         lsp-pyright-typechecking-mode "basic")) ;; Можно "strict" для более строгой проверки
 
 (after! ruby-mode
+  (setq lsp-enable-indentation nil)
   (setq flycheck-checker 'ruby-rubocop)
   (setq-default flycheck-disabled-checkers '(ruby-reek ruby-rubylint)))
+
 (after! flycheck
   (setq flycheck-checker-error-threshold 10000)
   (setq flycheck-idle-change-delay 3)
@@ -235,7 +236,8 @@
      (ruby "https://github.com/tree-sitter/tree-sitter-ruby")
      (yaml "https://github.com/ikatyang/tree-sitter-yaml")))
 
-(add-to-list 'treesit-extra-load-path (concat "~/.emacs.d/.local/straight/build-" emacs-version "/tree-sitter-langs/bin/"))
+;; (add-to-list 'treesit-extra-load-path (concat "~/.emacs.d/.local/straight/build-" emacs-version "/tree-sitter-langs/bin/"))
+(add-to-list 'treesit-extra-load-path (concat "~/.emacs.d/.local/etc/tree-sitter/"))
 
 (setq treesit-load-name-override-list '((ruby "ruby" "tree_sitter_ruby")))
 (setq major-mode-remap-alist
