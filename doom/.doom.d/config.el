@@ -191,27 +191,34 @@
 (use-package! gptel
  :config
  (setq! gptel-api-key (getenv "OPENAI_API_KEY"))
+ (setq! gptel-default-mode 'org-mode)
+ (setq! gptel-include-reasoning nil)
  (gptel-make-deepseek "DeepSeek" :stream t :key (getenv "DEEPSEEK_API_KEY"))
  (gptel-make-gemini "Gemini" :stream t :key (getenv "GEMINI_API_KEY")))
 
 (setq lsp-log-io nil)
 (setq lsp-use-plists t)
 
-(set-fringe-style '(14 . 0))
+(add-hook 'doom-init-ui-hook
+          (lambda ()
+            (setq-default left-fringe-width 14
+                          right-fringe-width 0)))
+
 (after! diff-hl
   (set-face-foreground 'diff-hl-insert "#0e960e")
   (set-face-foreground 'diff-hl-change "#ffc400")
   (set-face-foreground 'diff-hl-delete "#c7400e")
   (diff-hl-flydiff-mode 1)
-  (add-hook 'after-save-hook #'diff-hl-update)
   (add-hook 'magit-post-refresh-hook #'diff-hl-magit-post-refresh))
 
 (after! lsp-mode
-  (setq lsp-disabled-clients '(rubocop-ls))
+  (setq lsp-disabled-clients '(rubocop-ls)))
+
+(after! lsp-pyright
   (setq lsp-pyright-multi-root nil
         lsp-pyright-auto-import-completions t
         lsp-pyright-diagnostic-mode "workspace"
-        lsp-pyright-typechecking-mode "basic")) ;; Можно "strict" для более строгой проверки
+        lsp-pyright-typechecking-mode "basic"))
 
 (after! ruby-mode
   (setq lsp-enable-indentation nil)
