@@ -214,11 +214,15 @@
 (after! lsp-mode
   (setq lsp-disabled-clients '(rubocop-ls)))
 
+(add-to-list 'exec-path "~/.venvs/pyright/bin")
 (after! lsp-pyright
+  (setq lsp-pyright-langserver-command '("~/.venvs/pyright/bin/pyright-langserver" "--stdio"))
+  (setq lsp-auto-install-servers nil)
   (setq lsp-pyright-multi-root nil
         lsp-pyright-auto-import-completions t
         lsp-pyright-diagnostic-mode "workspace"
         lsp-pyright-typechecking-mode "basic"))
+
 
 (after! ruby-mode
   (setq lsp-enable-indentation nil)
