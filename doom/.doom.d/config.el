@@ -46,8 +46,8 @@
     ;; (set-fontset-font t 'cyrillic (font-spec :family "JetBrains Mono"))
     ;; (set-fontset-font t 'cyrillic (font-spec :family "FiraGo"))
 
-    (set-face-attribute 'cursor nil :family "JetBrains Mono")
-    (set-face-attribute 'org-table nil :inherit 'fixed-pitch)
+     (set-face-attribute 'cursor nil :family "JetBrains Mono")
+     (set-face-attribute 'org-table nil :inherit 'fixed-pitch)
 
     ;; Вертикальный курсор
     (setq-local cursor-type 'bar)
@@ -182,27 +182,28 @@
          ("C-c C-o" . 'copilot-complete))
   :config
   (setq copilot-idle-delay nil)
-  (add-hook 'post-command-hook #'copilot-clear-overlay)
   (add-to-list 'copilot-indentation-alist '(prog-mode 2))
   (add-to-list 'copilot-indentation-alist '(ruby-mode 2))
   (add-to-list 'copilot-indentation-alist '(python-mode 4))
   (add-to-list 'copilot-indentation-alist '(emacs-lisp-mode 2)))
 
 (use-package! gptel
- :config
- (setq! gptel-api-key (getenv "OPENAI_API_KEY"))
- (setq! gptel-default-mode 'org-mode)
- (setq! gptel-include-reasoning nil)
- (gptel-make-deepseek "DeepSeek" :stream t :key (getenv "DEEPSEEK_API_KEY"))
- (gptel-make-gemini "Gemini" :stream t :key (getenv "GEMINI_API_KEY")))
+  :config
+  (require 'gptel-integrations)
+  (setq! gptel-api-key (getenv "OPENAI_API_KEY"))
+  (setq! gptel-default-mode 'org-mode)
+  (setq! gptel-include-reasoning nil)
+  (gptel-make-deepseek "DeepSeek" :stream t :key (getenv "DEEPSEEK_API_KEY"))
+  (gptel-make-gemini "Gemini" :stream t :key (getenv "GEMINI_API_KEY")))
 
-(setq lsp-log-io nil)
-(setq lsp-use-plists t)
-
-(add-hook 'doom-init-ui-hook
-          (lambda ()
-            (setq-default left-fringe-width 14
-                          right-fringe-width 0)))
+(use-package! mcp
+  :after gptel
+  :config
+  (setq mcp-hub-servers
+        `(("fetch" . (:command "uvx"
+                      :args ("mcp-server-fetch")))
+          ("git" . (:command "uvx"
+                    :args ("mcp-server-git"))))))
 
 (after! diff-hl
   (set-face-foreground 'diff-hl-insert "#0e960e")
@@ -212,13 +213,13 @@
   (add-hook 'magit-post-refresh-hook #'diff-hl-magit-post-refresh))
 
 (after! lsp-mode
-  (setq lsp-disabled-clients '(rubocop-ls)))
+  (setq lsp-disabled-clients '(rubocop-ls))
+  (setq lsp-auto-install-servers nil))
 
 (add-to-list 'exec-path "~/.venvs/pyright/bin")
 (after! lsp-pyright
-  (setq lsp-pyright-langserver-command '("~/.venvs/pyright/bin/pyright-langserver" "--stdio"))
-  (setq lsp-auto-install-servers nil)
-  (setq lsp-pyright-multi-root nil
+  (setq lsp-pyright-langserver-command '("~/.venvs/pyright/bin/pyright-langserver" "--stdio")
+        lsp-pyright-multi-root nil
         lsp-pyright-auto-import-completions t
         lsp-pyright-diagnostic-mode "workspace"
         lsp-pyright-typechecking-mode "basic"))
@@ -230,9 +231,19 @@
   (setq-default flycheck-disabled-checkers '(ruby-reek ruby-rubylint)))
 
 (after! flycheck
+  (add-to-list 'exec-path "/home/pavel/.venv/bin")
+;;  (flycheck-set-checker-executable 'python-flake8 "/home/pavel/.venv/bin/flake8")
   (setq flycheck-checker-error-threshold 10000)
   (setq flycheck-idle-change-delay 3)
-  (setq flycheck-check-syntax-automatically '(save mode-enabled)))
+  (setq flycheck-check-syntax-automatically '(save mode-enabled))
+  (setq flycheck-python-flake8-executable (executable-find "flake8")))
+;;  (setq flycheck-python-flake8-executable (expand-file-name "~/.venv/bin/flake8")))
+
+(defun my/git-commit-insert-branch-name ()
+  "Insert current git branch name at the beginning of commit message."
+  (let ((branch (magit-get-current-branch)))
+      (insert (format "%s: " branch))))
+(add-hook 'git-commit-setup-hook #'my/git-commit-insert-branch-name)
 
 (setq-default flycheck-command-wrapper-function
   (lambda (command)

@@ -47,8 +47,6 @@
 ;(unpin! pinned-package another-pinned-package)
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
 ;(unpin! t)
-(package! copilot
-  :recipe (:host github :repo "zerolfx/copilot.el" :files ("*.el" "dist")))
 
 (package! reverse-im
   :recipe (:host github :repo "a13/reverse-im.el"))
@@ -59,7 +57,7 @@
 (package! org-roam-ui)
 
 (package! blacken)
-
 (package! git-gutter)
-
+(package! copilot :recipe (:host github :repo "zerolfx/copilot.el" :files ("*.el" "dist")))
 (package! copilot-chat)
+(package! eca :recipe (:host github :repo "editor-code-assistant/eca-emacs" :files ("*.el")))
